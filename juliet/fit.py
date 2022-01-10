@@ -1456,25 +1456,30 @@ class fit(object):
                 if self.nthreads is None:
                     # As with the other samplers, first extract list of possible args:
                     args = DynestySampler.__code__.co_varnames
+                    print(args)
                     d_args = {}
                     # Define some standard ones (for back-compatibility with previous juliet versions):
                     d_args['bound'] = 'multi'
                     d_args['sample'] = 'rwalk'
-                    d_args[nlive_arg] = self.n_live_points
+                    #d_args[nlive_arg] = self.n_live_points
                     # Match them with kwargs (kwargs take preference):
+                    print(kwargs)
                     for arg in args:
                         if arg in kwargs:
                             d_args[arg] = kwargs[arg]
+                    print(d_args)
                     # Define the sampler:
                     sampler = DynestySampler(self.loglike, self.prior_transform_r, self.data.nparams, **d_args)
 
                     # Now do the same for the actual sampler:
                     args = sampler.run_nested.__code__.co_varnames
                     ds_args = {}
+                    ds_args[nlive_arg] = self.n_live_points
                     # Load ones from kwargs:
                     for arg in args:
                         if arg in kwargs:
                             ds_args[arg] = kwargs[arg]
+                    print(ds_args)
                     # Now run:
                     sampler.run_nested(**ds_args)
                     # And extract results
@@ -1487,7 +1492,7 @@ class fit(object):
                     # Define some standard ones (for back-compatibility with previous juliet versions):
                     d_args['bound'] = 'multi'
                     d_args['sample'] = 'rwalk'
-                    d_args[nlive_arg] = self.n_live_points
+                    #d_args[nlive_arg] = self.n_live_points
                     # Match them with kwargs:
                     for arg in args:
                         if arg in kwargs:
@@ -1498,6 +1503,7 @@ class fit(object):
                     # Extract args:
                     args = mock_sampler.run_nested.__code__.co_varnames
                     ds_args = {}
+                    ds_args[nlive_arg] = self.n_live_points
                     # Load ones from kwargs:
                     for arg in args:
                         if arg in kwargs:

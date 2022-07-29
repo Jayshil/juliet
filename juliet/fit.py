@@ -78,7 +78,7 @@ G = 6.67408e-11 # Gravitational constant, mks
 log2pi = np.log(2.*np.pi) # ln(2*pi)
 
 # Import all the utils functions:
-from .utils import *
+from utils import *
 
 __all__ = ['load','fit','gaussian_process','model']
 
@@ -2640,19 +2640,19 @@ class model(object):
                        if not self.dictionary['fitrho']:
                            if not self.dictionary[instrument]['TransitFitCatwoman']:
                                a,b,p = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                       parameter_values['p_p'+str(i)]
+                                       parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
                            else:
                                a,b,p1,p2,phi = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                            parameter_values['p1_p'+str(i)], parameter_values['p2_p'+str(i)], \
+                                            parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]], \
                                             parameter_values['phi_p'+str(i)]
                                p = np.min([p1,p2])
                        else:
                            if not self.dictionary[instrument]['TransitFitCatwoman']:
                                 rho,b,p = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                          parameter_values['p_p'+str(i)]
+                                          parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
                            else:
                                 rho,b,p1,p2,phi = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                               parameter_values['p1_p'+str(i)], parameter_values['p2_p'+str(i)],\
+                                               parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]],\
                                                parameter_values['phi_p'+str(i)]
                                 p = np.min([p1,p2])
                            a = ((rho*G*((P*24.*3600.)**2))/(3.*np.pi))**(1./3.)
@@ -2885,6 +2885,9 @@ class model(object):
             self.ld_iname = {}
             self.mdilution_iname = {}
             self.fp_iname = {}
+            # To make transit depth (for batman and catwoman models) will be shared by different instruments, set the correct variable name for each:
+            self.p_iname = {}
+            self.p1_iname = {}
             self.ndatapoints_all_instruments = 0.
             # Variable that turns to false only if there are no TTVs. Otherwise, always positive:
             self.Tflag = False
@@ -2985,6 +2988,22 @@ class model(object):
                             else:
                                 if instrument in vec:
                                     self.fp_iname[instrument] = vec[2]
+                        if pname[0:2] == 'p_':
+                            vec = pname.split('_')
+                            if len(vec) > 3:
+                                if instrument in vec:
+                                    self.p_iname[instrument] = '_'.join(vec[2:])
+                            else:
+                                if instrument in vec:
+                                    self.p_iname[instrument] = vec[2]
+                        if pname[0:2] == 'p1':
+                            vec = pname.split('_')
+                            if len(vec) > 3:
+                                if instrument in vec:
+                                    self.p1_iname[instrument] = '_'.join(vec[2:])
+                            else:
+                                if instrument in vec:
+                                    self.p1_iname[instrument] = vec[2]
                 else:
                     # Now proceed with instrument namings:
                     for pname in self.priors.keys():

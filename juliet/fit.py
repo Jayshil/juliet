@@ -2564,14 +2564,6 @@ class model(object):
                 else:
                     coeff1 = parameter_values['q1_'+self.ld_iname[instrument]]
 
-                ### For instrument dependent eclipse depth:
-                ### We only want to make eclipse depth instrument depended, not the time correction factor
-                for i in self.numbering:
-                    if self.dictionary[instrument]['EclipseFit'] or self.dictionary[instrument]['TranEclFit']:
-                        fp = parameter_values['fp_p' + str(i) + '_' + self.fp_iname[instrument]]
-                        ac = parameter_values['ac_p' + str(i)]
-                ###
-
                 # First (1) check if TTV mode is activated. If it is not, simply save the sampled planet periods and time-of transit centers for check
                 # in the next round of iteration (see below). If it is, depending on the parametrization, either shift the time-indexes accordingly (see below
                 # comments for details).
@@ -2622,6 +2614,11 @@ class model(object):
                 # Once all is OK with the periods and time-of-transit centers, loop through all the planets, getting the lightcurve model for each:
                 for i in self.numbering:
                     P, t0 = cP[i], ct0[i]
+                    ### For instrument dependent eclipse depth:
+                    ### We only want to make eclipse depth instrument depended, not the time correction factor
+                    if self.dictionary[instrument]['EclipseFit'] or self.dictionary[instrument]['TranEclFit']:
+                        fp = parameter_values['fp_p' + str(i) + '_' + self.fp_iname[instrument]]
+                        ac = parameter_values['ac_p' + str(i)]
                     if self.dictionary['efficient_bp'][i]:
                         if not self.dictionary['fitrho']:
                             a,r1,r2   = parameter_values['a_p'+str(i)], parameter_values['r1_p'+str(i)],\
@@ -2637,25 +2634,25 @@ class model(object):
                             b,p = (1. + self.pl) + np.sqrt(r1/self.Ar)*r2*(self.pu-self.pl),\
                                   self.pu + (self.pl-self.pu)*np.sqrt(r1/self.Ar)*(1.-r2)
                     else:
-                       if not self.dictionary['fitrho']:
-                           if not self.dictionary[instrument]['TransitFitCatwoman']:
-                               a,b,p = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                       parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
-                           else:
-                               a,b,p1,p2,phi = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                            parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]], \
-                                            parameter_values['phi_p'+str(i)]
-                               p = np.min([p1,p2])
-                       else:
-                           if not self.dictionary[instrument]['TransitFitCatwoman']:
-                                rho,b,p = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                          parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
-                           else:
-                                rho,b,p1,p2,phi = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                               parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]],\
-                                               parameter_values['phi_p'+str(i)]
+                        if not self.dictionary['fitrho']:
+                            if not self.dictionary[instrument]['TransitFitCatwoman']:
+                                a,b,p = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
+                                        parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
+                            else:
+                                a,b,p1,p2,phi = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
+                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]], \
+                                                parameter_values['phi_p'+str(i)]
                                 p = np.min([p1,p2])
-                           a = ((rho*G*((P*24.*3600.)**2))/(3.*np.pi))**(1./3.)
+                        else:
+                            if not self.dictionary[instrument]['TransitFitCatwoman']:
+                                    rho,b,p = parameter_values['rho'], parameter_values['b_p'+str(i)],\
+                                            parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
+                            else:
+                                    rho,b,p1,p2,phi = parameter_values['rho'], parameter_values['b_p'+str(i)],\
+                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]],\
+                                                parameter_values['phi_p'+str(i)]
+                                    p = np.min([p1,p2])
+                            a = ((rho*G*((P*24.*3600.)**2))/(3.*np.pi))**(1./3.)
 
                     # Now extract eccentricity and omega depending on the used parametrization for each planet:
                     if self.dictionary['ecc_parametrization'][i] == 0:

@@ -78,7 +78,7 @@ G = 6.67408e-11 # Gravitational constant, mks
 log2pi = np.log(2.*np.pi) # ln(2*pi)
 
 # Import all the utils functions:
-from utils import *
+from .utils import *
 
 __all__ = ['load','fit','gaussian_process','model']
 
@@ -2617,7 +2617,7 @@ class model(object):
                     ### For instrument dependent eclipse depth:
                     ### We only want to make eclipse depth instrument depended, not the time correction factor
                     if self.dictionary[instrument]['EclipseFit'] or self.dictionary[instrument]['TranEclFit']:
-                        fp = parameter_values['fp_p' + str(i) + '_' + self.fp_iname[instrument]]
+                        fp = parameter_values['fp_p' + str(i) + '_' + self.fp_iname['p' + str(i)][instrument]]
                         ac = parameter_values['ac_p' + str(i)]
                     if self.dictionary['efficient_bp'][i]:
                         if not self.dictionary['fitrho']:
@@ -2637,19 +2637,19 @@ class model(object):
                         if not self.dictionary['fitrho']:
                             if not self.dictionary[instrument]['TransitFitCatwoman']:
                                 a,b,p = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                        parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
+                                        parameter_values['p_p'+str(i)+'_'+self.p_iname['p' + str(i)][instrument]]
                             else:
                                 a,b,p1,p2,phi = parameter_values['a_p'+str(i)], parameter_values['b_p'+str(i)],\
-                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]], \
+                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname['p' + str(i)][instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname['p' + str(i)][instrument]], \
                                                 parameter_values['phi_p'+str(i)]
                                 p = np.min([p1,p2])
                         else:
                             if not self.dictionary[instrument]['TransitFitCatwoman']:
                                     rho,b,p = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                            parameter_values['p_p'+str(i)+'_'+self.p_iname[instrument]]
+                                            parameter_values['p_p'+str(i)+'_'+self.p_iname['p' + str(i)][instrument]]
                             else:
                                     rho,b,p1,p2,phi = parameter_values['rho'], parameter_values['b_p'+str(i)],\
-                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname[instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname[instrument]],\
+                                                parameter_values['p1_p'+str(i)+'_'+self.p1_iname['p' + str(i)][instrument]], parameter_values['p2_p'+str(i)+'_'+self.p1_iname['p' + str(i)][instrument]],\
                                                 parameter_values['phi_p'+str(i)]
                                     p = np.min([p1,p2])
                             a = ((rho*G*((P*24.*3600.)**2))/(3.*np.pi))**(1./3.)
@@ -2885,6 +2885,12 @@ class model(object):
             # To make transit depth (for batman and catwoman models) will be shared by different instruments, set the correct variable name for each:
             self.p_iname = {}
             self.p1_iname = {}
+            # Since p, p1 and fp are all planetary and instrumental parameters,
+            # we want to make sure that we have correct variable name for each instruments (when the instruments are shared) for _every_ planets.
+            for i in self.numbering:
+                self.p_iname['p' + str(i)] = {}
+                self.p1_iname['p' + str(i)] = {}
+                self.fp_iname['p' + str(i)] = {}
             self.ndatapoints_all_instruments = 0.
             # Variable that turns to false only if there are no TTVs. Otherwise, always positive:
             self.Tflag = False
@@ -2981,26 +2987,26 @@ class model(object):
                             vec = pname.split('_')
                             if len(vec) > 3:
                                 if instrument in vec:
-                                    self.fp_iname[instrument] = '_'.join(vec[2:])
+                                    self.fp_iname[vec[1]][instrument] = '_'.join(vec[2:])
                             else:
                                 if instrument in vec:
-                                    self.fp_iname[instrument] = vec[2]
+                                    self.fp_iname[vec[1]][instrument] = vec[2]
                         if pname[0:2] == 'p_':
                             vec = pname.split('_')
                             if len(vec) > 3:
                                 if instrument in vec:
-                                    self.p_iname[instrument] = '_'.join(vec[2:])
+                                    self.p_iname[vec[1]][instrument] = '_'.join(vec[2:])
                             else:
                                 if instrument in vec:
-                                    self.p_iname[instrument] = vec[2]
+                                    self.p_iname[vec[1]][instrument] = vec[2]
                         if pname[0:2] == 'p1':
                             vec = pname.split('_')
                             if len(vec) > 3:
                                 if instrument in vec:
-                                    self.p1_iname[instrument] = '_'.join(vec[2:])
+                                    self.p1_iname[vec[1]][instrument] = '_'.join(vec[2:])
                             else:
                                 if instrument in vec:
-                                    self.p1_iname[instrument] = vec[2]
+                                    self.p1_iname[vec[1]][instrument] = vec[2]
                 else:
                     # Now proceed with instrument namings:
                     for pname in self.priors.keys():

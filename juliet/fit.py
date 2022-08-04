@@ -562,17 +562,18 @@ class load(object):
                             dictionary[inames[i]]['TransitFit'] = True
                             if self.verbose:
                                 print('\t Transit fit detected for instrument ',inames[i])
-                    if pri[0:3] == 'phi':
-                        dictionary[inames[i]]['TransitFit'] = True
-                        dictionary[inames[i]]['TransitFitCatwoman'] = True
-                        if self.verbose:
-                            print('\t Transit (catwoman) fit detected for instrument ',inames[i])
+                    if pri[0:2] == 'p1':
+                        if inames[i] in pri.split('_'):
+                            dictionary[inames[i]]['TransitFit'] = True
+                            dictionary[inames[i]]['TransitFitCatwoman'] = True
+                            if self.verbose:
+                                print('\t Transit (catwoman) fit detected for instrument ',inames[i])
                     ###
                     if pri[0:2] == 'fp':
-                        #dictionary[inames[i]]['TransitFit'] = True
-                        dictionary[inames[i]]['EclipseFit'] = True
-                        if self.verbose:
-                            print('\t Eclipse fit detected for instrument ',inames[i])
+                        if inames[i] in pri.split('_'):
+                            dictionary[inames[i]]['EclipseFit'] = True
+                            if self.verbose:
+                                print('\t Eclipse fit detected for instrument ',inames[i])
                     ###
                     if pri[0:2] == 'dt' or pri[0:2] == 'T_':
                         if pri[0:2] == 'T_':

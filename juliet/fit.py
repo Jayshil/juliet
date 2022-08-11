@@ -1449,10 +1449,8 @@ class fit(object):
             elif 'dynesty' in self.sampler:
                 if self.sampler == 'dynamic_dynesty':
                     DynestySampler = dynesty.DynamicNestedSampler
-                    nlive_arg = 'nlive_init'
                 elif self.sampler == 'dynesty':
                     DynestySampler = dynesty.NestedSampler
-                    nlive_arg = 'nlive'
 
                 # To run dynesty, we do it a little bit different depending if we are doing multithreading or not:
                 if self.nthreads is None:
@@ -1489,7 +1487,7 @@ class fit(object):
                     # Define some standard ones (for back-compatibility with previous juliet versions):
                     d_args['bound'] = 'multi'
                     d_args['sample'] = 'rwalk'
-                    d_args[nlive_arg] = self.n_live_points
+                    d_args['nlive'] = self.n_live_points
                     # Match them with kwargs:
                     for arg in args:
                         if arg in kwargs:

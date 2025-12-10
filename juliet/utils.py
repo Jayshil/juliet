@@ -104,13 +104,22 @@ def init_catwoman(t, ld_law, nresampling = None, etresampling = None):
     else:
         params.u = [0.1, 0.3]
     params.limb_dark = ld_law
+
+    # For occultations
+    params.fp = 0.001
+    params.t_secondary = params.t0 + (params.per/2)
+
     if nresampling is None or etresampling is None:
-        m = catwoman.TransitModel(params, t)
+        m = [catwoman.TransitModel(params, t), catwoman.TransitModel(params, t, transittype='secondary')]
     else:
-        m = catwoman.TransitModel(params,
+        m = [catwoman.TransitModel(params,
                                   t,
                                   supersample_factor=nresampling,
-                                  exp_time=etresampling)
+                                  exp_time=etresampling),\
+            catwoman.TransitModel(params,
+                                  t, transittype='secondary',
+                                  supersample_factor=nresampling,
+                                  exp_time=etresampling)]
     return params, m
 
 def correct_light_travel_time(times, params):
